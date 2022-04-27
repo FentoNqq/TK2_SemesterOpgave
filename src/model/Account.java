@@ -21,4 +21,12 @@ public class Account {
 	public int getId() {
 		return id;
 	}
+	
+	public void withdrawBalance(float amount) {
+		balance -= amount;
+	}
+	
+	public void addBalance(float amount) {
+		balance += amount;
+	}
 }
