@@ -1,6 +1,7 @@
 package db;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -43,10 +44,13 @@ public class AccountDB implements AccountDBIF {
 		toAccount.addBalance(amount);
 		float fromBalance = fromAccount.getBalance();
 		float toBalance = toAccount.getBalance();
+		System.out.println(fromBalance);
+		System.out.println(toBalance);
 		updateBalance(fromAccountID, fromBalance);
 		updateBalance(toAccountID, toBalance);
 	}
 	
+	@Override
 	public void updateBalance(int accountID, float balance) throws DataAccessException {
 		Connection con = DBConnection.getInstance().getConnection();
 		String baseUpdate = "update Tk2_Account ";
@@ -54,8 +58,8 @@ public class AccountDB implements AccountDBIF {
 		baseUpdate += "where id = " + accountID + ";";
 		
 		try {
-			Statement stmt = con.createStatement();
-			stmt.executeQuery(baseUpdate);
+			PreparedStatement stmt = con.prepareStatement(baseUpdate);
+			stmt.execute();
 			stmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
