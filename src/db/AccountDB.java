@@ -9,10 +9,12 @@ import java.sql.Statement;
 import model.Account;
 
 public class AccountDB implements AccountDBIF {
+	
+	private int isolationLevel = Connection.TRANSACTION_REPEATABLE_READ;
 
 	@Override
-	public Account findAccountByID(int accountID) throws DataAccessException {
-		Connection con = DBConnection.getInstance().getConnection();
+	public Account findAccountByID(int accountID) throws Exception {
+		Connection con = DBConnection.getInstance().getConnection(isolationLevel);
 		Account account = null;
 		String baseSelect = "select * from Tk2_Account ";
 		baseSelect += "where id = " + accountID + ";";
@@ -21,21 +23,27 @@ public class AccountDB implements AccountDBIF {
 		float balance = 0;
 		
 		try {
+			con.setAutoCommit(false);
 			Statement stmt = con.createStatement();
 			rs = stmt.executeQuery(baseSelect);
 			rs.next();
 			balance = rs.getFloat("balance");
 			stmt.close();
+			Thread.sleep(25);
+			con.commit();
 			
 			account = new Account(balance, accountID);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			con.rollback();;
+			throw e;
+		} finally {
+			con.setAutoCommit(true);
 		}
 		return account;
 	}
 
 	@Override
-	public void transferBalance(int fromAccountID, int toAccountID, float amount) throws DataAccessException {
+	public void transferBalance(int fromAccountID, int toAccountID, float amount) throws Exception {
 		Account fromAccount = null;
 		Account toAccount = null;
 		fromAccount = findAccountByID(fromAccountID);
@@ -44,25 +52,33 @@ public class AccountDB implements AccountDBIF {
 		toAccount.addBalance(amount);
 		float fromBalance = fromAccount.getBalance();
 		float toBalance = toAccount.getBalance();
-		System.out.println(fromBalance);
-		System.out.println(toBalance);
+		System.out.println("withdrew " + amount + " from account " + fromAccountID);
+		System.out.println("deposited " + amount + " to account " + toAccountID);
 		updateBalance(fromAccountID, fromBalance);
 		updateBalance(toAccountID, toBalance);
 	}
 	
 	@Override
-	public void updateBalance(int accountID, float balance) throws DataAccessException {
-		Connection con = DBConnection.getInstance().getConnection();
+	public void updateBalance(int accountID, float balance) throws Exception {
+		Connection con = DBConnection.getInstance().getConnection(isolationLevel);
 		String baseUpdate = "update Tk2_Account ";
 		baseUpdate += "set balance = " + balance + " ";
 		baseUpdate += "where id = " + accountID + ";";
 		
 		try {
+			con.setAutoCommit(false);
 			PreparedStatement stmt = con.prepareStatement(baseUpdate);
-			stmt.execute();
+			stmt.executeUpdate();
 			stmt.close();
+			
+			Thread.sleep(50);
+			con.commit();
+			System.out.println("Committed");
 		} catch (SQLException e) {
-			e.printStackTrace();
+			con.rollback();
+			throw e;
+		} finally {
+			con.setAutoCommit(true);
 		}
 	}
 

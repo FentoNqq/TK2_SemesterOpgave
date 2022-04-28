@@ -12,7 +12,7 @@ public class Program {
 			
 			public void run() {
 				try {
-					accountDB.transferBalance(2, 1, 100);
+					accountDB.transferBalance(3, 2, 50);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -23,7 +23,7 @@ public class Program {
 			
 			public void run() {
 				try {
-					accountDB.transferBalance(3, 1, 100);
+					accountDB.transferBalance(1, 2, 100);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

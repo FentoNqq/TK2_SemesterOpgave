@@ -129,7 +129,12 @@ public class DBConnection {
 		return res;
 	}
 
-	public Connection getConnection() {
+	public Connection getConnection(int isolationLevel) {
+		try {
+		connection.setTransactionIsolation(isolationLevel);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		return connection;
 	}
 
