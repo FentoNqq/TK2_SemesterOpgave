@@ -3,7 +3,7 @@ package model;
 import db.AccountDB;
 import db.AccountDBIF;
 
-public class Program {
+public class Program extends Thread {
 
 	public static void main(String[] args) {
 		AccountDBIF accountDB = new AccountDB();
